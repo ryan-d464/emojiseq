@@ -1,0 +1,16 @@
+{
+  "name": "emojiseq",
+  "version": "0.1.0",
+  "description": "Compiles .emj source files of named shortcodes into verified emoji sequences",
+  "type": "module",
+  "bin": {
+    "emojiseq": "./dist/main.js"
+  },
+  "scripts": {
+    "build": "tsc"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  }
+}

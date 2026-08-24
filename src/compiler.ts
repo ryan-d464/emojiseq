@@ -4,6 +4,9 @@
 //
 //   name = :shortcode: + :shortcode: + ...
 //
+// A shortcode for a human figure may carry a skin tone modifier right
+// after its name, sharing the middle colon: :man:medium-dark:
+//
 // Blank lines and lines starting with # are ignored. Everything after
 // an unquoted # on a line is treated as a trailing comment.
 
@@ -35,6 +38,27 @@ export const EMOJI_TABLE: Record<string, string> = {
   kiss: "\u{1F48B}",
   zwj: "‍",
 };
+
+// Fitzpatrick skin tone modifiers (Unicode emoji-modifiers.txt). Applied
+// as a combining codepoint directly after the base glyph.
+export const SKIN_TONE_TABLE: Record<string, string> = {
+  light: "\u{1F3FB}",
+  "medium-light": "\u{1F3FC}",
+  medium: "\u{1F3FD}",
+  "medium-dark": "\u{1F3FE}",
+  dark: "\u{1F3FF}",
+};
+
+// Only human figures take a skin tone modifier; objects and joiners don't.
+const MODIFIABLE_SHORTCODES = new Set([
+  "man",
+  "woman",
+  "girl",
+  "boy",
+  "baby",
+  "older_man",
+  "older_woman",
+]);
 
 export class CompileError extends Error {
   readonly line: number;
@@ -120,19 +144,31 @@ export function lexLine(text: string, lineNumber: number): Token[] {
     if (ch === ":") {
       let j = i + 1;
       while (j < n && isIdentPart(text[j])) j++;
-      if (j < n && text[j] === ":" && j > i + 1) {
-        const value = text.slice(i, j + 1);
-        tokens.push({ type: "shortcode", value, line: lineNumber, column });
-        i = j + 1;
-        continue;
+      if (j === i + 1 || text[j] !== ":") {
+        throw new CompileError(
+          'unterminated shortcode, expected a closing ":"',
+          lineNumber,
+          column,
+          text,
+          Math.max(1, j - i),
+        );
       }
-      throw new CompileError(
-        'unterminated shortcode, expected a closing ":"',
-        lineNumber,
-        column,
-        text,
-        Math.max(1, j - i),
-      );
+
+      // A skin tone modifier is written right after the name with no
+      // space, sharing the middle colon: ":man:medium-dark:".
+      let end = j + 1;
+      if (end < n && isIdentStart(text[end])) {
+        let k = end + 1;
+        while (k < n && isIdentPart(text[k])) k++;
+        if (k < n && text[k] === ":") {
+          end = k + 1;
+        }
+      }
+
+      const value = text.slice(i, end);
+      tokens.push({ type: "shortcode", value, line: lineNumber, column });
+      i = end;
+      continue;
     }
 
     if (isIdentStart(ch)) {
@@ -160,8 +196,13 @@ export function lexLine(text: string, lineNumber: number): Token[] {
   return tokens;
 }
 
-function shortcodeName(token: Token): string {
-  return token.value.slice(1, -1);
+// Splits a shortcode token's text into its name and, if present, its
+// skin tone modifier: ":man:medium-dark:" -> { name: "man", modifier: "medium-dark" }.
+function splitShortcode(value: string): { name: string; modifier?: string } {
+  const inner = value.slice(1, -1);
+  const colon = inner.indexOf(":");
+  if (colon === -1) return { name: inner };
+  return { name: inner.slice(0, colon), modifier: inner.slice(colon + 1) };
 }
 
 // Plain Levenshtein distance, used to power "did you mean" hints.
@@ -312,12 +353,12 @@ export function compileFile(
 
       let emoji = "";
       for (const part of parts) {
-        const key = shortcodeName(part);
+        const { name: key, modifier } = splitShortcode(part.value);
         const glyph = EMOJI_TABLE[key];
         if (glyph === undefined) {
           const suggestion = suggestShortcode(key);
           throw new CompileError(
-            `unknown shortcode '${part.value}'`,
+            `unknown shortcode ':${key}:'`,
             part.line,
             part.column,
             rawLine,
@@ -325,7 +366,34 @@ export function compileFile(
             suggestion ? `did you mean ':${suggestion}:'?` : undefined,
           );
         }
-        emoji += glyph;
+
+        if (modifier === undefined) {
+          emoji += glyph;
+          continue;
+        }
+
+        if (!MODIFIABLE_SHORTCODES.has(key)) {
+          throw new CompileError(
+            `':${key}:' does not take a skin tone modifier`,
+            part.line,
+            part.column,
+            rawLine,
+            part.value.length,
+          );
+        }
+
+        const tone = SKIN_TONE_TABLE[modifier];
+        if (tone === undefined) {
+          throw new CompileError(
+            `unknown skin tone modifier '${modifier}'`,
+            part.line,
+            part.column,
+            rawLine,
+            part.value.length,
+            `expected one of: ${Object.keys(SKIN_TONE_TABLE).join(", ")}`,
+          );
+        }
+        emoji += glyph + tone;
       }
 
       results.push({ name, emoji });

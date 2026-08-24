@@ -61,6 +61,19 @@ name = :shortcode: + :shortcode: + ...
 - The set of known shortcodes lives in `src/compiler.ts` and is currently
   small on purpose (see Roadmap).
 
+Shortcodes for human figures (`:man:`, `:woman:`, `:girl:`, `:boy:`,
+`:baby:`, `:older_man:`, `:older_woman:`) accept a skin tone modifier
+right after the name, sharing the middle colon:
+
+```
+wave = :man:medium-dark: + :zwj: + :kiss:
+```
+
+Valid modifiers are `light`, `medium-light`, `medium`, `medium-dark`,
+and `dark`. Applying one to a non-human shortcode, or misspelling the
+modifier, is a compile error with the same line/column reporting as
+everything else.
+
 ## Building
 
 ```
@@ -72,7 +85,6 @@ There are no runtime dependencies.
 
 ## Roadmap
 
-- Skin tone modifiers (`:man:medium-dark:`)
 - Flag sequences built from regional indicator pairs
 - Generate the shortcode table from Unicode's `emoji-zwj-sequences.txt`
   instead of hand-writing it

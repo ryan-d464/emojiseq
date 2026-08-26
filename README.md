@@ -74,6 +74,16 @@ and `dark`. Applying one to a non-human shortcode, or misspelling the
 modifier, is a compile error with the same line/column reporting as
 everything else.
 
+Flags are built from pairs of regional indicator symbols rather than
+hand-listed, so any ISO 3166-1 alpha-2 country code works with the
+`:flag:` shortcode:
+
+```
+trip = :flag:jp: + :zwj: + :heart: + :zwj: + :flag:us:
+```
+
+A code that isn't two letters is a compile error at the same column.
+
 ## Building
 
 ```
@@ -85,7 +95,6 @@ There are no runtime dependencies.
 
 ## Roadmap
 
-- Flag sequences built from regional indicator pairs
 - Generate the shortcode table from Unicode's `emoji-zwj-sequences.txt`
   instead of hand-writing it
 - `--out` flag to write compiled sequences to a file instead of stdout

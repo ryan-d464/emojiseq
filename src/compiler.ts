@@ -7,6 +7,9 @@
 // A shortcode for a human figure may carry a skin tone modifier right
 // after its name, sharing the middle colon: :man:medium-dark:
 //
+// A flag is written as :flag: followed by an ISO 3166-1 alpha-2 country
+// code sharing the middle colon, the same way skin tones work: :flag:us:
+//
 // Blank lines and lines starting with # are ignored. Everything after
 // an unquoted # on a line is treated as a trailing comment.
 
@@ -22,6 +25,20 @@ export interface Token {
 export interface Sequence {
   name: string;
   emoji: string;
+}
+
+// Codepoint for the regional indicator symbol 'A'. A flag is two of
+// these back to back, one per letter of an ISO 3166-1 alpha-2 code:
+// U+1F1FA U+1F1F8 ('U' + 'S') renders as the US flag.
+const REGIONAL_INDICATOR_BASE = 0x1f1e6;
+
+function regionalIndicatorFlag(code: string): string | undefined {
+  if (!/^[A-Za-z]{2}$/.test(code)) return undefined;
+  return Array.from(code.toUpperCase())
+    .map((ch) =>
+      String.fromCodePoint(REGIONAL_INDICATOR_BASE + ch.charCodeAt(0) - 65),
+    )
+    .join("");
 }
 
 // A small starter set. Extending this to the full Unicode emoji-data
@@ -230,7 +247,7 @@ function editDistance(a: string, b: string): number {
 function suggestShortcode(name: string): string | undefined {
   let best: string | undefined;
   let bestDistance = Infinity;
-  for (const candidate of Object.keys(EMOJI_TABLE)) {
+  for (const candidate of [...Object.keys(EMOJI_TABLE), "flag"]) {
     const distance = editDistance(name, candidate);
     if (distance < bestDistance) {
       bestDistance = distance;
@@ -354,6 +371,32 @@ export function compileFile(
       let emoji = "";
       for (const part of parts) {
         const { name: key, modifier } = splitShortcode(part.value);
+
+        if (key === "flag") {
+          if (modifier === undefined) {
+            throw new CompileError(
+              "expected a two-letter country code, e.g. ':flag:us:'",
+              part.line,
+              part.column,
+              rawLine,
+              part.value.length,
+            );
+          }
+          const flagGlyph = regionalIndicatorFlag(modifier);
+          if (flagGlyph === undefined) {
+            throw new CompileError(
+              `'${modifier}' is not a two-letter country code`,
+              part.line,
+              part.column,
+              rawLine,
+              part.value.length,
+              "expected two letters, e.g. 'us' or 'jp'",
+            );
+          }
+          emoji += flagGlyph;
+          continue;
+        }
+
         const glyph = EMOJI_TABLE[key];
         if (glyph === undefined) {
           const suggestion = suggestShortcode(key);

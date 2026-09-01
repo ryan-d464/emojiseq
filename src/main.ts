@@ -1,13 +1,40 @@
 #!/usr/bin/env node
-import { readFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 import { compileFile } from "./compiler.js";
 
+interface Args {
+  file?: string;
+  out?: string;
+}
+
+function parseArgs(argv: string[]): Args | undefined {
+  const args: Args = {};
+  for (let i = 0; i < argv.length; i++) {
+    const arg = argv[i];
+    if (arg === "--out") {
+      const value = argv[i + 1];
+      if (value === undefined) return undefined;
+      args.out = value;
+      i++;
+      continue;
+    }
+    if (arg.startsWith("--out=")) {
+      args.out = arg.slice("--out=".length);
+      continue;
+    }
+    if (args.file !== undefined) return undefined;
+    args.file = arg;
+  }
+  return args;
+}
+
 function main(argv: string[]): number {
-  const file = argv[0];
-  if (!file) {
-    process.stderr.write("usage: emojiseq <file.emj>\n");
+  const args = parseArgs(argv);
+  if (!args || !args.file) {
+    process.stderr.write("usage: emojiseq <file.emj> [--out <file>]\n");
     return 1;
   }
+  const { file, out } = args;
 
   let source: string;
   try {
@@ -30,8 +57,18 @@ function main(argv: string[]): number {
     return 1;
   }
 
-  for (const result of results) {
-    process.stdout.write(`${result.name} = ${result.emoji}\n`);
+  const output = results.map((r) => `${r.name} = ${r.emoji}\n`).join("");
+
+  if (out) {
+    try {
+      writeFileSync(out, output, "utf8");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      process.stderr.write(`emojiseq: cannot write '${out}': ${message}\n`);
+      return 1;
+    }
+  } else {
+    process.stdout.write(output);
   }
   return 0;
 }

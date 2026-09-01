@@ -47,6 +47,13 @@ error: unknown shortcode ':hert:'
 1 error
 ```
 
+By default the compiled sequences print to stdout. Use `--out` to write
+them to a file instead:
+
+```
+$ emojiseq family.emj --out family.txt
+```
+
 ## Source format
 
 One statement per line:
@@ -97,5 +104,4 @@ There are no runtime dependencies.
 
 - Generate the shortcode table from Unicode's `emoji-zwj-sequences.txt`
   instead of hand-writing it
-- `--out` flag to write compiled sequences to a file instead of stdout
 - A test suite covering the lexer, parser, and diagnostics

@@ -100,8 +100,19 @@ npm run build
 This runs `tsc` against `src/` and writes plain JavaScript to `dist/`.
 There are no runtime dependencies.
 
+## Testing
+
+```
+npm test
+```
+
+This builds the project and runs the test suite with Node's built-in
+test runner (`node --test`), no test framework required. Tests live
+alongside the source in `src/compiler.test.ts` and cover the lexer,
+the statement parser, and the diagnostic messages, including their
+line/column pointers and did-you-mean hints.
+
 ## Roadmap
 
 - Generate the shortcode table from Unicode's `emoji-zwj-sequences.txt`
   instead of hand-writing it
-- A test suite covering the lexer, parser, and diagnostics

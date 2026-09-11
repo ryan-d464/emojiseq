@@ -65,12 +65,16 @@ name = :shortcode: + :shortcode: + ...
 - Blank lines are ignored.
 - `#` starts a comment that runs to the end of the line.
 - A name may only be defined once per file.
-- The set of known shortcodes lives in `src/compiler.ts` and is currently
-  small on purpose (see Roadmap).
+- The set of known shortcodes lives in `src/compiler.ts` as `EMOJI_TABLE`.
+  It covers common human figures, several fantasy figures, and a grab bag
+  of objects and nature glyphs, but it is still hand-maintained rather
+  than generated from Unicode's data files (see Roadmap).
 
-Shortcodes for human figures (`:man:`, `:woman:`, `:girl:`, `:boy:`,
-`:baby:`, `:older_man:`, `:older_woman:`) accept a skin tone modifier
-right after the name, sharing the middle colon:
+Shortcodes for human figures, plus fantasy figures that have a
+Fitzpatrick tone in the Unicode data (`:elf:`, `:vampire:`, `:mage:`,
+and similar, but not `:genie:` or `:zombie:`, which are always their
+own color), accept a skin tone modifier right after the name, sharing
+the middle colon:
 
 ```
 wave = :man:medium-dark: + :zwj: + :kiss:

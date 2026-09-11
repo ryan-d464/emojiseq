@@ -91,6 +91,24 @@ test("compileFile builds a flag from a two-letter country code", () => {
   assert.equal(results[0].emoji, "\u{1F1FA}\u{1F1F8}");
 });
 
+test("compileFile applies a skin tone modifier to a fantasy figure that supports one", () => {
+  const { results, errors } = compileFile("e = :elf:dark:", "test.emj");
+  assert.equal(errors.length, 0);
+  assert.equal(results[0].emoji, "\u{1F9DD}\u{1F3FF}");
+});
+
+test("compileFile rejects a skin tone modifier on a fantasy figure that doesn't support one", () => {
+  const { errors } = compileFile("z = :zombie:medium:", "test.emj");
+  assert.equal(errors.length, 1);
+  assert.match(errors[0].message, /does not take a skin tone modifier/);
+});
+
+test("compileFile resolves plain object and nature shortcodes", () => {
+  const { results, errors } = compileFile("win = :trophy: + :zwj: + :sparkles:", "test.emj");
+  assert.equal(errors.length, 0);
+  assert.equal(results[0].emoji, "\u{1F3C6}\u{200D}✨");
+});
+
 test("compileFile allows the same name to be reused across separate calls", () => {
   const { results: first } = compileFile("x = :man:", "a.emj");
   const { results: second } = compileFile("x = :woman:", "b.emj");

@@ -41,8 +41,9 @@ function regionalIndicatorFlag(code: string): string | undefined {
     .join("");
 }
 
-// A small starter set. Extending this to the full Unicode emoji-data
-// tables is future work (see README roadmap).
+// Generating this from Unicode's emoji-zwj-sequences.txt is still on the
+// roadmap; for now every entry here has been checked by hand against the
+// Unicode emoji data tables.
 export const EMOJI_TABLE: Record<string, string> = {
   man: "\u{1F468}",
   woman: "\u{1F469}",
@@ -51,9 +52,58 @@ export const EMOJI_TABLE: Record<string, string> = {
   baby: "\u{1F476}",
   older_man: "\u{1F474}",
   older_woman: "\u{1F475}",
+  person: "\u{1F9D1}",
+  older_person: "\u{1F9D3}",
+  police_officer: "\u{1F46E}",
+  construction_worker: "\u{1F477}",
+  guard: "\u{1F482}",
+  detective: "\u{1F575}",
+  bride_with_veil: "\u{1F470}",
+  man_in_tuxedo: "\u{1F935}",
+  princess: "\u{1F478}",
+  prince: "\u{1F934}",
+  superhero: "\u{1F9B8}",
+  supervillain: "\u{1F9B9}",
+  mage: "\u{1F9D9}",
+  fairy: "\u{1F9DA}",
+  vampire: "\u{1F9DB}",
+  merperson: "\u{1F9DC}",
+  elf: "\u{1F9DD}",
+  santa: "\u{1F385}",
+  mrs_claus: "\u{1F936}",
+  running: "\u{1F3C3}",
+  walking: "\u{1F6B6}",
+  raising_hand: "\u{1F64B}",
+  bowing: "\u{1F647}",
+  shrug: "\u{1F937}",
+  facepalm: "\u{1F926}",
+  genie: "\u{1F9DE}",
+  zombie: "\u{1F9DF}",
   heart: "❤️",
   kiss: "\u{1F48B}",
   zwj: "‍",
+  fire: "\u{1F525}",
+  star: "⭐",
+  sparkles: "✨",
+  tada: "\u{1F389}",
+  rainbow: "\u{1F308}",
+  rocket: "\u{1F680}",
+  sun: "☀️",
+  moon: "\u{1F319}",
+  cloud: "☁️",
+  snowflake: "❄️",
+  gift: "\u{1F381}",
+  balloon: "\u{1F388}",
+  trophy: "\u{1F3C6}",
+  crown: "\u{1F451}",
+  gem: "\u{1F48E}",
+  key: "\u{1F511}",
+  lock: "\u{1F512}",
+  bulb: "\u{1F4A1}",
+  bell: "\u{1F514}",
+  book: "\u{1F4D6}",
+  eyes: "\u{1F440}",
+  thinking: "\u{1F914}",
 };
 
 // Fitzpatrick skin tone modifiers (Unicode emoji-modifiers.txt). Applied
@@ -67,6 +117,9 @@ export const SKIN_TONE_TABLE: Record<string, string> = {
 };
 
 // Only human figures take a skin tone modifier; objects and joiners don't.
+// Fantasy figures are a mixed bag in the Unicode data itself: elves and
+// vampires take a tone, but genies and zombies are always their own
+// color, so those two are deliberately left out of this set.
 const MODIFIABLE_SHORTCODES = new Set([
   "man",
   "woman",
@@ -75,6 +128,31 @@ const MODIFIABLE_SHORTCODES = new Set([
   "baby",
   "older_man",
   "older_woman",
+  "person",
+  "older_person",
+  "police_officer",
+  "construction_worker",
+  "guard",
+  "detective",
+  "bride_with_veil",
+  "man_in_tuxedo",
+  "princess",
+  "prince",
+  "superhero",
+  "supervillain",
+  "mage",
+  "fairy",
+  "vampire",
+  "merperson",
+  "elf",
+  "santa",
+  "mrs_claus",
+  "running",
+  "walking",
+  "raising_hand",
+  "bowing",
+  "shrug",
+  "facepalm",
 ]);
 
 export class CompileError extends Error {

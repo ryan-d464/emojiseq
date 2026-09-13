@@ -103,6 +103,36 @@ test("compileFile rejects a skin tone modifier on a fantasy figure that doesn't 
   assert.match(errors[0].message, /does not take a skin tone modifier/);
 });
 
+test("compileFile builds a gendered role from a man_/woman_ prefix", () => {
+  const { results, errors } = compileFile(
+    "officer = :woman_police_officer:",
+    "test.emj",
+  );
+  assert.equal(errors.length, 0);
+  assert.equal(results[0].emoji, "\u{1F46E}\u{200D}\u{2640}\u{FE0F}");
+});
+
+test("compileFile applies a skin tone modifier to a gendered role", () => {
+  const { results, errors } = compileFile(
+    "officer = :man_construction_worker:dark:",
+    "test.emj",
+  );
+  assert.equal(errors.length, 0);
+  assert.equal(
+    results[0].emoji,
+    "\u{1F477}\u{1F3FF}\u{200D}\u{2642}\u{FE0F}",
+  );
+});
+
+test("compileFile reports an unknown skin tone modifier on a gendered role", () => {
+  const { errors } = compileFile(
+    "x = :woman_guard:sunburnt:",
+    "test.emj",
+  );
+  assert.equal(errors.length, 1);
+  assert.match(errors[0].message, /unknown skin tone modifier 'sunburnt'/);
+});
+
 test("compileFile resolves plain object and nature shortcodes", () => {
   const { results, errors } = compileFile("win = :trophy: + :zwj: + :sparkles:", "test.emj");
   assert.equal(errors.length, 0);

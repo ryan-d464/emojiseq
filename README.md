@@ -85,6 +85,18 @@ and `dark`. Applying one to a non-human shortcode, or misspelling the
 modifier, is a compile error with the same line/column reporting as
 everything else.
 
+A few role shortcodes (`:police_officer:`, `:construction_worker:`,
+`:guard:`, `:detective:`) render as a man by default in the Unicode
+data, and have separate `man_` and `woman_` prefixed forms for the
+explicit ZWJ sequence:
+
+```
+officer = :woman_police_officer:medium: + :zwj: + :key:
+```
+
+The prefixed form takes a skin tone modifier the same way the plain
+name does.
+
 Flags are built from pairs of regional indicator symbols rather than
 hand-listed, so any ISO 3166-1 alpha-2 country code works with the
 `:flag:` shortcode:

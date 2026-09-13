@@ -10,6 +10,11 @@
 // A flag is written as :flag: followed by an ISO 3166-1 alpha-2 country
 // code sharing the middle colon, the same way skin tones work: :flag:us:
 //
+// A handful of role shortcodes (:police_officer:, :construction_worker:,
+// :guard:, :detective:) have explicit gendered forms written with a
+// man_ or woman_ prefix: :woman_police_officer:. These take a skin tone
+// modifier the same way the plain role name does.
+//
 // Blank lines and lines starting with # are ignored. Everything after
 // an unquoted # on a line is treated as a trailing comment.
 
@@ -154,6 +159,44 @@ const MODIFIABLE_SHORTCODES = new Set([
   "shrug",
   "facepalm",
 ]);
+
+// Role emoji whose base codepoint renders as a man by default. Unicode's
+// explicit gendered forms are a ZWJ sequence, not a separate codepoint:
+// base glyph + zero-width joiner + a gender sign (WOMAN POLICE OFFICER is
+// U+1F46E U+200D U+2640 U+FE0F). Written here as "man_police_officer" /
+// "woman_police_officer" so the prefix reads the same as the plain name.
+const GENDERED_ROLE_BASES: Record<string, string> = {
+  police_officer: EMOJI_TABLE.police_officer,
+  construction_worker: EMOJI_TABLE.construction_worker,
+  guard: EMOJI_TABLE.guard,
+  detective: EMOJI_TABLE.detective,
+};
+
+const GENDER_ZWJ = "‍";
+const MALE_SIGN = "\u{2642}\u{FE0F}";
+const FEMALE_SIGN = "\u{2640}\u{FE0F}";
+
+const GENDERED_ROLE_NAMES = Object.keys(GENDERED_ROLE_BASES).flatMap(
+  (role) => [`man_${role}`, `woman_${role}`],
+);
+
+// Splits "man_police_officer" into its base role and gender sign. Skin
+// tone modifies the base figure, so it has to be spliced in before the
+// joiner rather than appended after it the way a plain shortcode's is.
+function splitGenderedRole(
+  name: string,
+): { base: string; sign: string } | undefined {
+  for (const [prefix, sign] of [
+    ["man_", MALE_SIGN],
+    ["woman_", FEMALE_SIGN],
+  ] as const) {
+    if (name.startsWith(prefix)) {
+      const base = name.slice(prefix.length);
+      if (base in GENDERED_ROLE_BASES) return { base, sign };
+    }
+  }
+  return undefined;
+}
 
 export class CompileError extends Error {
   readonly line: number;
@@ -325,7 +368,11 @@ function editDistance(a: string, b: string): number {
 function suggestShortcode(name: string): string | undefined {
   let best: string | undefined;
   let bestDistance = Infinity;
-  for (const candidate of [...Object.keys(EMOJI_TABLE), "flag"]) {
+  for (const candidate of [
+    ...Object.keys(EMOJI_TABLE),
+    "flag",
+    ...GENDERED_ROLE_NAMES,
+  ]) {
     const distance = editDistance(name, candidate);
     if (distance < bestDistance) {
       bestDistance = distance;
@@ -472,6 +519,28 @@ export function compileFile(
             );
           }
           emoji += flagGlyph;
+          continue;
+        }
+
+        const genderedRole = splitGenderedRole(key);
+        if (genderedRole) {
+          const baseGlyph = GENDERED_ROLE_BASES[genderedRole.base];
+          if (modifier === undefined) {
+            emoji += baseGlyph + GENDER_ZWJ + genderedRole.sign;
+            continue;
+          }
+          const tone = SKIN_TONE_TABLE[modifier];
+          if (tone === undefined) {
+            throw new CompileError(
+              `unknown skin tone modifier '${modifier}'`,
+              part.line,
+              part.column,
+              rawLine,
+              part.value.length,
+              `expected one of: ${Object.keys(SKIN_TONE_TABLE).join(", ")}`,
+            );
+          }
+          emoji += baseGlyph + tone + GENDER_ZWJ + genderedRole.sign;
           continue;
         }
 

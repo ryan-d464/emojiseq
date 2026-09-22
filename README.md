@@ -107,6 +107,13 @@ trip = :flag:jp: + :zwj: + :heart: + :zwj: + :flag:us:
 
 A code that isn't two letters is a compile error at the same column.
 
+## Examples
+
+`examples/families.emj` has every family ZWJ sequence Unicode defines -
+two parents or one, of any gender pairing, with one or two children of
+either gender. 25 sequences in total, built from the same handful of
+shortcodes as the README examples above.
+
 ## Building
 
 ```

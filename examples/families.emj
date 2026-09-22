@@ -1,0 +1,39 @@
+# Every family ZWJ sequence Unicode defines: two parents (any pairing of
+# man/woman) or one parent, with one or two children (any pairing of
+# girl/boy). 25 sequences in total. The README only shows one of these
+# (man + woman + girl + boy) - this file has the rest.
+
+# two parents, man and woman
+family_mw_g = :man: + :zwj: + :woman: + :zwj: + :girl:
+family_mw_b = :man: + :zwj: + :woman: + :zwj: + :boy:
+family_mw_gb = :man: + :zwj: + :woman: + :zwj: + :girl: + :zwj: + :boy:
+family_mw_gg = :man: + :zwj: + :woman: + :zwj: + :girl: + :zwj: + :girl:
+family_mw_bb = :man: + :zwj: + :woman: + :zwj: + :boy: + :zwj: + :boy:
+
+# two parents, both men
+family_mm_g = :man: + :zwj: + :man: + :zwj: + :girl:
+family_mm_b = :man: + :zwj: + :man: + :zwj: + :boy:
+family_mm_gb = :man: + :zwj: + :man: + :zwj: + :girl: + :zwj: + :boy:
+family_mm_gg = :man: + :zwj: + :man: + :zwj: + :girl: + :zwj: + :girl:
+family_mm_bb = :man: + :zwj: + :man: + :zwj: + :boy: + :zwj: + :boy:
+
+# two parents, both women
+family_ww_g = :woman: + :zwj: + :woman: + :zwj: + :girl:
+family_ww_b = :woman: + :zwj: + :woman: + :zwj: + :boy:
+family_ww_gb = :woman: + :zwj: + :woman: + :zwj: + :girl: + :zwj: + :boy:
+family_ww_gg = :woman: + :zwj: + :woman: + :zwj: + :girl: + :zwj: + :girl:
+family_ww_bb = :woman: + :zwj: + :woman: + :zwj: + :boy: + :zwj: + :boy:
+
+# one parent, a man
+family_m_g = :man: + :zwj: + :girl:
+family_m_b = :man: + :zwj: + :boy:
+family_m_gb = :man: + :zwj: + :girl: + :zwj: + :boy:
+family_m_gg = :man: + :zwj: + :girl: + :zwj: + :girl:
+family_m_bb = :man: + :zwj: + :boy: + :zwj: + :boy:
+
+# one parent, a woman
+family_w_g = :woman: + :zwj: + :girl:
+family_w_b = :woman: + :zwj: + :boy:
+family_w_gb = :woman: + :zwj: + :girl: + :zwj: + :boy:
+family_w_gg = :woman: + :zwj: + :girl: + :zwj: + :girl:
+family_w_bb = :woman: + :zwj: + :boy: + :zwj: + :boy:

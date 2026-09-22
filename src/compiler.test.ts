@@ -1,6 +1,11 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import path from "node:path";
 import { compileFile, lexLine, CompileError } from "./compiler.js";
+
+const projectRoot = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 
 // --- lexer ---
 
@@ -221,6 +226,22 @@ test("compileFile keeps compiling later lines after an error", () => {
   assert.equal(errors.length, 1);
   assert.equal(results.length, 1);
   assert.equal(results[0].name, "good");
+});
+
+// --- example files ---
+
+test("examples/families.emj compiles all 25 Unicode family sequences without errors", () => {
+  const source = readFileSync(
+    path.join(projectRoot, "examples", "families.emj"),
+    "utf8",
+  );
+  const { results, errors } = compileFile(source, "families.emj");
+  assert.deepEqual(errors, []);
+  assert.equal(results.length, 25);
+  assert.equal(new Set(results.map((r) => r.name)).size, 25);
+  for (const result of results) {
+    assert.match(result.emoji, /\u{200D}/u);
+  }
 });
 
 test("CompileError.formatDiagnostic points a caret at the offending span", () => {
